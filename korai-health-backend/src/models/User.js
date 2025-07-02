@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: [6, 'Password must be at least 6 characters'],
-        select: false, // Never return password in queries
+        select: false,
     },
     createdAt: {
         type: Date,
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
     },
 });
 
-// Indexes for faster queries
-userSchema.index({ email: 1 }, { unique: true });
+// ❌ Remove this line:
+// userSchema.index({ email: 1 }, { unique: true });
 
 module.exports = mongoose.model('User', userSchema);

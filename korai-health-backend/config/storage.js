@@ -15,14 +15,20 @@ const storage = multer.diskStorage({
 
 // File filter: only accept PDFs and images
 function fileFilter(req, file, cb) {
-    const allowedTypes = /pdf|jpg|jpeg|png/;
-    const ext = path.extname(file.originalname).toLowerCase().slice(1);
-    if (allowedTypes.test(ext)) {
+    const allowedExts = ['.pdf', '.jpg', '.jpeg', '.png'];
+    const allowedMimes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png'
+    ];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedExts.includes(ext) && allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     } else {
         cb(new Error('Only PDF and image files are allowed!'), false);
     }
 }
+
 
 const upload = multer({
     storage,

@@ -1,6 +1,6 @@
-// src/controllers/reportController.js
-
+const fs = require('fs');
 const path = require('path');
+const pdfParse = require('pdf-parse'); // Make sure to run: npm install pdf-parse
 const ocrConfig = require('../../config/ocr');
 const tesseractService = require('../services/ocr/tesseract');
 const googleVisionService = require('../services/ocr/googleVision');
@@ -13,12 +13,22 @@ exports.uploadReport = async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
-        // OCR extraction
-        let extractedText;
-        if (ocrConfig.provider === 'google') {
-            extractedText = await googleVisionService.extractText(req.file.path);
+        const ext = path.extname(req.file.filename).toLowerCase();
+
+        let extractedText = '';
+
+        if (ext === '.pdf') {
+            // Read PDF file buffer
+            const dataBuffer = fs.readFileSync(req.file.path);
+            const pdfData = await pdfParse(dataBuffer);
+            extractedText = pdfData.text;
         } else {
-            extractedText = await tesseractService.extractText(req.file.path);
+            // OCR extraction
+            if (ocrConfig.provider === 'google') {
+                extractedText = await googleVisionService.extractText(req.file.path);
+            } else {
+                extractedText = await tesseractService.extractText(req.file.path);
+            }
         }
 
         // Parse health data
@@ -42,15 +52,5 @@ exports.uploadReport = async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ message: 'Report processing failed', error: err.message });
-    }
-};
-
-// Get all reports for a user (for trends)
-exports.getUserReports = async (req, res) => {
-    try {
-        const reports = await Report.find({ user: req.user._id }).sort({ uploadedAt: -1 });
-        res.json({ reports });
-    } catch (err) {
-        res.status(500).json({ message: 'Failed to fetch reports', error: err.message });
     }
 };

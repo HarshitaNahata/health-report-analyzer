@@ -1,6 +1,14 @@
 // tests/e2e/auth.test.js
 const request = require('supertest');
 const app = require('../../src/app');
+const assert = require('assert');
+// Before or in beforeEach() in your test file
+const User = require('../../src/models/User'); // Adjust path as needed
+
+before(async () => {
+    await User.deleteMany({});
+});
+
 
 describe('Authentication', () => {
     it('should register a new user', async () => {
