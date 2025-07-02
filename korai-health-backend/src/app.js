@@ -1,24 +1,38 @@
 require('dotenv').config();
-// src/app.js
 const express = require('express');
 const cors = require('cors');
-const routes = require('./routes');
-const errorHandler = require('./middleware/errorHandler');
 const connectDB = require('../config/database');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// Connect to MongoDB
+// Connect to DB
 connectDB();
 
-// Middleware
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON bodies
+// ✅ CORS middleware (important: place before routes)
+app.use(cors({
+    origin: 'http://localhost:5174', // Your React frontend
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
+// Parse JSON
+app.use(express.json());
+
+// 🧠 Handle preflight OPTIONS
+app.options('*', cors());
 
 // Routes
-app.use(routes);
+const reportRoutes = require('./routes/reportRoutes');
+const authRoutes = require('./routes/authRoutes');
+const ocrRoutes = require('./routes/ocrRoutes');
 
-// Error handling middleware (must be last)
+app.use('/api/reports', reportRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/ocr', ocrRoutes);
+
+// Error handler
 app.use(errorHandler);
 
 module.exports = app;

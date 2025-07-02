@@ -1,14 +1,12 @@
-// src/routes/index.js
 const express = require('express');
-const router = express.Router();
-
 const authRoutes = require('./authRoutes');
 const reportRoutes = require('./reportRoutes');
+const ocrRoutes = require('./ocrRoutes'); // ✅ Add this line
 
-// Prefix all auth routes with /api/auth
+const router = express.Router();
+
 router.use('/api/auth', authRoutes);
-
-// Prefix all report routes with /api/reports
 router.use('/api/reports', reportRoutes);
+router.use('/api/ocr', ocrRoutes); // ✅ Add this line
 
 module.exports = router;

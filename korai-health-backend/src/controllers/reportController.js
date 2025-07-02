@@ -54,3 +54,17 @@ exports.uploadReport = async (req, res) => {
         res.status(500).json({ message: 'Report processing failed', error: err.message });
     }
 };
+
+// Fetch user-specific reports
+exports.getUserReports = async (req, res) => {
+    try {
+        const userId = req.user?._id;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+        const reports = await Report.find({ user: userId }).sort({ uploadedAt: -1 });
+
+        res.json({ reports });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch reports', error: err.message });
+    }
+};

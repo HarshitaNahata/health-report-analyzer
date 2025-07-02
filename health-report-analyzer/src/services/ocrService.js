@@ -1,11 +1,9 @@
-// src/services/ocrService.js
 export const extractHealthData = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
 
   try {
-    // Send to backend proxy endpoint
-    const response = await fetch('/api/ocr/process-report', {
+    const response = await fetch('http://localhost:3001/api/reports/upload', {
       method: 'POST',
       body: formData,
       headers: {
@@ -13,15 +11,16 @@ export const extractHealthData = async (file) => {
       }
     });
 
+    // ✅ Safe check before parsing JSON
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'OCR processing failed');
+      const errorText = await response.text(); // read as plain text
+      throw new Error(`OCR processing failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
-    return await response.json();
+    return await response.json(); // only runs if response is OK
 
   } catch (error) {
-    console.error('OCR Error:', error);
+    console.error('OCR Error:', error.message);
 
     // Fallback to simulated data for development
     return [
